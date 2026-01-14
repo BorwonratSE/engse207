@@ -71,7 +71,7 @@ Copy code
 ## 🚀 How to Run
 
 # 1. Clone repository
-git clone https://github.com/RMUTL-ENGSE207/midterm-2568-6531503XXX.git
+git clone git@github.com:BorwonratSE/engse207.git
 
 # 2. Install dependencies
 npm install
