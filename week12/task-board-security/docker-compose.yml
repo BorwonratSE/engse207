@@ -1,0 +1,101 @@
+name: task-board-security
+
+services:
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+    depends_on:
+      - auth-service
+      - task-service
+      - user-service
+    networks:
+      - taskboard-net
+
+  auth-service:
+    build: ./auth-service
+    environment:
+      PORT: 3001
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES: ${JWT_EXPIRES}
+      DB_HOST: auth-db
+      DB_NAME: ${AUTH_DB_NAME}
+      DB_USER: ${AUTH_DB_USER}
+      DB_PASSWORD: ${AUTH_DB_PASSWORD}
+    depends_on:
+      - auth-db
+    networks:
+      - taskboard-net
+
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${AUTH_DB_NAME}
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    networks:
+      - taskboard-net
+
+  task-service:
+    build: ./task-service
+    environment:
+      PORT: 3002
+      JWT_SECRET: ${JWT_SECRET}
+      DB_HOST: task-db
+      DB_NAME: ${TASK_DB_NAME}
+      DB_USER: ${TASK_DB_USER}
+      DB_PASSWORD: ${TASK_DB_PASSWORD}
+    depends_on:
+      - task-db
+    networks:
+      - taskboard-net
+
+  task-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${TASK_DB_NAME}
+      POSTGRES_USER: ${TASK_DB_USER}
+      POSTGRES_PASSWORD: ${TASK_DB_PASSWORD}
+    volumes:
+      - task-db-data:/var/lib/postgresql/data
+    networks:
+      - taskboard-net
+
+  user-service:
+    build: ./user-service
+    environment:
+      PORT: 3003
+      JWT_SECRET: ${JWT_SECRET}
+      DB_HOST: user-db
+      DB_NAME: ${USER_DB_NAME}
+      DB_USER: ${USER_DB_USER}
+      DB_PASSWORD: ${USER_DB_PASSWORD}
+    depends_on:
+      - user-db
+    networks:
+      - taskboard-net
+
+  user-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+    networks:
+      - taskboard-net
+
+networks:
+  taskboard-net:
+    driver: bridge
+
+volumes:
+  auth-db-data:
+  task-db-data:
+  user-db-data:
